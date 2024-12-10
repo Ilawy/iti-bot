@@ -1,5 +1,6 @@
 import { LeetCode, ProblemList } from "npm:leetcode-query";
-import { Result, Ok, ErrImpl, OkImpl, Err } from "npm:ts-results-es"
+import { Result, Ok, Err } from "npm:ts-results-es"
+import pb from "./db.ts";
 
 type Difficulty = "EASY" | "MEDIUM" | "HARD";
 
@@ -16,6 +17,7 @@ const kv = await Deno.openKv();
 
 const OFFSET_KEY: Deno.KvKey = ["leetcode", "offset"];
 const DIFFICULTY_KEY: Deno.KvKey = ["leetcode", "difficulty"];
+const PROBLEMS_KEY: Deno.KvKey = ["leetcode", "problems"];
 
 
 interface FailedMessage{
@@ -60,6 +62,21 @@ export async function getDailyProblem(): Promise<Result<ProblemList, Error>> {
         } satisfies FailedMessage)
         return responseResult
     }
+    //store problem
+    const storeResult = await resultify(pb.collection("problems").create({
+        title: responseResult.value.questions[0].title,
+        slug: responseResult.value.questions[0].titleSlug,
+        offset,
+        submitted_by: []
+    }));
+    if(storeResult.isErr()){
+        kv.enqueue({
+            offset,
+            type: "leet_code_failed"
+        } satisfies FailedMessage)
+        return storeResult
+    }
+
     //increase
     const increaseResult = await resultify(kv.set(OFFSET_KEY, offset+1));
     if(increaseResult.isErr()){
@@ -69,6 +86,7 @@ export async function getDailyProblem(): Promise<Result<ProblemList, Error>> {
         } satisfies FailedMessage)
         return increaseResult;
     }
+
     //finally
     return responseResult
 }
