@@ -5,7 +5,7 @@ const env = await load()
 
 const token = env.PB_TOKEN;
 
-const pb = new PocketBase('https://iti-45.pockethost.io');
+const pb = new PocketBase(env.PB_URL);
 
 pb.authStore.save(token, null);
 
