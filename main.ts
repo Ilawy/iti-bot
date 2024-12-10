@@ -34,4 +34,6 @@ Deno.serve({ port: 8000 }, ()=>{
 });
 
 //TODO: add command to get the next problem manually
+//TODO: check if there's an already sent challange tody
+//      this can be overridden by and option in getDailyProblem() function to send two problems today
 //TODO: add queue handler to re-send failed messages
