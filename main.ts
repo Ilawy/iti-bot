@@ -26,5 +26,9 @@ Deno.cron("Daily leetcode", "0 8 * * *", async () => {
   });
 });
 
+Deno.serve({ port: 8000 }, ()=>{
+  return new Response("NOT YET USABLE, I GUESS...");
+});
+
 //TODO: add command to get the next problem manually
 //TODO: add queue handler to re-send failed messages
