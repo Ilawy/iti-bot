@@ -12,7 +12,10 @@ const bot = createBot({
   },
 });
 
-Deno.cron("Daily leetcode", "0 8 * * *", async () => {
+const threeMinuteCron = "*/3 * * * *";
+const everyDayAt8PmCron = "0 8 * * *";
+
+Deno.cron("Daily leetcode", threeMinuteCron, async () => {
   const result = await getDailyProblem();
   if (result.isErr()) {
     console.log(result.error);
