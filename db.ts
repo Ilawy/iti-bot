@@ -1,11 +1,15 @@
-import { load } from "https://deno.land/std@0.212.0/dotenv/mod.ts";
 import PocketBase from "npm:pocketbase";
 
-const env = await load();
+const PB_TOKEN = Deno.env.get("PB_TOKEN");
+const PB_URL = Deno.env.get("PB_URL");
 
-const token = env.PB_TOKEN;
+if (!PB_TOKEN || !PB_URL) {
+    throw new Error("Missing env vars (PB_TOKEN, PB_URL)");
+}
 
-const pb = new PocketBase(env.PB_URL);
+const token = PB_TOKEN;
+
+const pb = new PocketBase(PB_URL);
 
 pb.authStore.save(token, null);
 

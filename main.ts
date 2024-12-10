@@ -1,11 +1,12 @@
-import { load } from "https://deno.land/std@0.212.0/dotenv/mod.ts";
 import { createBot } from "npm:@discordeno/bot@19.0.0";
 import { getDailyProblem } from "./leet.ts";
 
-const env = await load();
+const DISCORD_TOKEN = Deno.env.get("DISCORD_TOKEN")
+const DISCORD_CHANNEL = Deno.env.get("DISCORD_CHANNEL")
+if (!DISCORD_TOKEN || !DISCORD_CHANNEL)throw new Error("Missing env vars (DISCORD_TOKEN, DISCORD_CHANNEL)");
 
 const bot = createBot({
-  token: env.DISCORD_TOKEN,
+  token: DISCORD_TOKEN,
   events: {
     ready: ({ shardId }) => console.log(`Shard ${shardId} ready`),
   },
@@ -17,7 +18,7 @@ Deno.cron("Daily leetcode", "0 8 * * *", async () => {
     console.log(result.error);
     return; // will be handled by the queue
   }
-  await bot.helpers.sendMessage(env.DISCORD_CHANNEL, {
+  await bot.helpers.sendMessage(DISCORD_CHANNEL, {
     content: `Problem time!  
 [${result.value.questions[0].title}](https://leetcode.com/problems/${
       result.value.questions[0].titleSlug
