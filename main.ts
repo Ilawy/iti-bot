@@ -1,5 +1,8 @@
 import { createBot } from "npm:@discordeno/bot@19.0.0";
-import { getDailyProblem } from "./leet.ts";
+import { getDailyProblem, lc } from "./leet.ts";
+import { Hono } from 'npm:hono';
+import { renderProblem } from "./genpic.tsx";
+import { Problem } from "npm:leetcode-query";
 
 const DISCORD_TOKEN = Deno.env.get("DISCORD_TOKEN")
 const DISCORD_CHANNEL = Deno.env.get("DISCORD_CHANNEL")
@@ -29,9 +32,21 @@ Deno.cron("Daily leetcode", everyDayAt6PM, async () => {
   });
 });
 
-Deno.serve({ port: 8000 }, ()=>{
-  return new Response("NOT YET USABLE, I GUESS...");
-});
+const app = new Hono();
+
+app.get("/gen", async (c) => {
+  const problem = await lc.problem("median-of-two-sorted-arrays");
+  const image = await renderProblem(problem, new Date());
+  //cache image for 3 years  
+  return new Response(image, {
+    headers: {
+      "Content-Type": "image/png",
+      "Cache-Control": "public, max-age=31536000",
+    },
+  })
+})
+
+Deno.serve({ port: 8000 }, app.fetch);
 
 //TODO: add command to get the next problem manually
 //TODO: check if there's an already sent challange tody

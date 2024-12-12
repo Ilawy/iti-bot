@@ -106,3 +106,8 @@ export async function getDailyProblem(): Promise<Result<ProblemList, Error>> {
     //finally
     return responseResult;
 }
+
+
+export{
+    lc
+}
