@@ -32,20 +32,20 @@ export type FinalFail =
     | FailedToMarkProblemAsSent;
 
 async function problem_handler(fail: FailedToGetProblem) {
-    console.log("ERROR", fail.error.message);
+    console.log("ERROR", fail.error);
  
 }
 
 async function image_handler(fail: FailedToGetImage) {
-    console.log("ERROR", fail.error.message);
+    console.log("ERROR", fail.error);
 }
 
 async function send_handler(fail: FailedToSendProblem) {
-    console.log("ERROR", fail.error.message);
+    console.log("ERROR", fail.error);
 }
 
 async function mark_handler(fail: FailedToMarkProblemAsSent) {
-    console.log("ERROR", fail.error.message);
+    console.log("ERROR", fail.error);
 }
 
 export async function handleQueue(message: FinalFail) {
