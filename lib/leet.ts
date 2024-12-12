@@ -58,9 +58,25 @@ export async function getRandomProblem(
             return totalResult;
         }
         if (!totalResult.value.value) {
-            return Err(new Error("No problems found"));
+            const totalResult2 = await resultify(lc.problems({
+                filters: { difficulty: DIFFICULTY },
+                limit: 1,
+            }).then(d => d.total))
+            if (totalResult2.isErr()) {
+                console.log(totalResult2.error);
+                return totalResult2;
+            }
+            const totalResult3 = await resultify(
+                kv.set(TOTAL_PROBLEMS_OF_KEY(DIFFICULTY), totalResult2.value),
+            )
+            if(totalResult3.isErr()) {
+                console.log(totalResult3.error);
+                return totalResult3;
+            }
+            TOTAL = totalResult2.value;
+        }else{
+            TOTAL = totalResult.value.value;
         }
-        TOTAL = totalResult.value.value;
     }
 
     //index
