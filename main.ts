@@ -4,7 +4,8 @@ import { Hono } from "npm:hono";
 import { renderProblem } from "./lib/genpic.tsx";
 import { Problem } from "npm:leetcode-query";
 import { resultify, toJsonError } from "./lib/types.ts";
-import { FailedToGetProblem, pushQueue } from "./lib/queue.ts";
+import { FailedToGetProblem, handleQueue, pushQueue } from "./lib/queue.ts";
+import { kv } from "./lib/kv.ts";
 
 const DISCORD_TOKEN = Deno.env.get("DISCORD_TOKEN");
 const DISCORD_CHANNEL = Deno.env.get("DISCORD_CHANNEL");
@@ -30,8 +31,8 @@ const everyDayAt6PM = "0 16 * * *";
 
 Deno.cron("Daily leetcode", threeMinuteCron, async () => {
   //problem
-  const problemResult = await getRandomProblem();
-  if (problemResult.isErr()) {
+  const problemResult = await getRandomProblem();  
+  if (problemResult.isErr()) {    
     await pushQueue({
       type: "failed-to-get-problem",
       error: toJsonError(problemResult.error),
@@ -90,6 +91,8 @@ Deno.cron("Daily leetcode", threeMinuteCron, async () => {
     return; // will be handled by the queue
   }
 });
+
+kv.listenQueue(handleQueue)
 
 const app = new Hono();
 

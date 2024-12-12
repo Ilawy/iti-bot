@@ -31,15 +31,22 @@ export type FinalFail =
     | FailedToSendProblem
     | FailedToMarkProblemAsSent;
 
-function problem_handler(fail: FailedToGetProblem) {
+async function problem_handler(fail: FailedToGetProblem) {
+    console.log("ERROR", fail.error.message);
+ 
 }
 
-function image_handler(fail: FailedToGetImage) {
+async function image_handler(fail: FailedToGetImage) {
+    console.log("ERROR", fail.error.message);
 }
 
-function send_handler(fail: FailedToSendProblem) {}
+async function send_handler(fail: FailedToSendProblem) {
+    console.log("ERROR", fail.error.message);
+}
 
-function mark_handler(fail: FailedToMarkProblemAsSent) {}
+async function mark_handler(fail: FailedToMarkProblemAsSent) {
+    console.log("ERROR", fail.error.message);
+}
 
 export async function handleQueue(message: FinalFail) {
     switch (message.type) {
@@ -52,7 +59,7 @@ export async function handleQueue(message: FinalFail) {
         case "failed-to-mark-problem-as-sent":
             return await mark_handler(message);
         default:
-            throw new Error("Unknown message type");
+            return; //! ignore
     }
 }
 
