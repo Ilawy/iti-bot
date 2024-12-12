@@ -1,4 +1,4 @@
-// deno-lint-ignore no-unused-vars
+/**@jsx React.createElement */
 import React from "https://esm.sh/react@18.2.0";
 import satori from "npm:satori";
 import { Problem } from "npm:leetcode-query";
