@@ -28,7 +28,7 @@ const bot = createBot({
 const threeMinuteCron = "*/3 * * * *";
 const everyDayAt6PM = "0 16 * * *";
 
-Deno.cron("Daily leetcode", everyDayAt6PM, async () => {
+Deno.cron("Daily leetcode", threeMinuteCron, async () => {
   //problem
   const problemResult = await getRandomProblem();
   if (problemResult.isErr()) {
