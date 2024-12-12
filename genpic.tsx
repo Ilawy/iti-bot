@@ -1,7 +1,9 @@
+// deno-lint-ignore no-unused-vars
 import React from "https://esm.sh/react@18.2.0";
 import satori from "npm:satori";
-import { Resvg } from "npm:@resvg/resvg-js";
 import { Problem } from "npm:leetcode-query";
+import { render } from "https://deno.land/x/resvg_wasm@0.2.0/mod.ts";
+
 
 const ArialBuffer = await Deno.readFile("./fonts/Arial.ttf");
 
@@ -73,38 +75,6 @@ export async function renderProblem(problem: Problem, today: Date) {
     },
   );
 
-  const resvg = new Resvg(svg, {
-    background: "transparent",
-  });
-
-  const buffer = resvg.render().asPng();
-  return new Uint8Array(buffer.buffer);
+  return await render(svg);
 }
 
-// export async function gen(message: string) {
-//   const svg = await satori(
-//     template({message}),
-//     {
-//       width: 320,
-//       height: 180,
-//       fonts: [
-//         {
-//           name: "Roboto",
-//           // Use `fs` (Node.js only) or `fetch` to read the font as Buffer/ArrayBuffer and provide `data` here.
-//           data: ArialBuffer,
-//           weight: 400,
-//           style: "normal",
-//         },
-//       ],
-//     },
-//   );
-
-//   const resvg = new Resvg(svg, {
-//     background: "transparent",
-//   });
-
-//   const buffer = resvg.render().asPng();
-//   return new Uint8Array(buffer.buffer);
-// }
-
-// await Deno.writeFile("./test.png", new Uint8Array(buffer.buffer));
