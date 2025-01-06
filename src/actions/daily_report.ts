@@ -41,8 +41,11 @@ export default async function daily_report(raw_day: Date): Promise<Result<any, E
 
     const results = Promise.allSettled(users.map(async user => {
         const acs = await resultify(getAcceptedByUsername(user.leetcode))
-        if (acs.isErr()) throw acs.error
-        console.log('done', user.leetcode);
+        if (acs.isErr()) {
+            console.error(acs.error)
+            throw acs.error
+        }
+
 
         return {
             subs: acs.value.filter(sub => sub.timestamp.hasSame(day, 'day')).length,

@@ -29,7 +29,9 @@ class Queue {
 
         switch (message.type) {
             case "daily-report":
+                console.log(`Daily report for ${message.date}`);
                 await daily_report(message.date);
+                console.log("Daily report sent");
                 break;
             default:
                 console.error(`Unknown message type: ${message.type}`);
