@@ -31,6 +31,8 @@ const bot = createBot({
 });
 
 const everyDayAt6PM = "0 16 * * *";
+const everyDayAt10PM = "0 22 * * *";
+
 
 async function task_leetcode() {
   //problem
@@ -86,6 +88,13 @@ async function task_leetcode() {
 }
 
 Deno.cron("Daily leetcode", everyDayAt6PM, task_leetcode);
+Deno.cron("Daily report", everyDayAt10PM, () => {
+  queue.enqueue({
+    type: "daily-report",
+    date: new Date(),
+    created_at: new Date(),
+  })
+})
 
 kv.listenQueue(queue.handler.bind(queue));
 
