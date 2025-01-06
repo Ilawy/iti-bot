@@ -49,8 +49,8 @@ export default async function daily_report(raw_day: Date): Promise<Result<any, E
             username: user.leetcode
         }
     }))
-
-    bot.api.sendMessage("7403177717", `Daily report for ${day.toFormat("yyyy\\-MM\\-dd")}:\n\n${await results.then(r => r.map(r => r.status === "fulfilled" ? `${r.value.username.replaceAll("-", "\\-").replaceAll("_", "\\_")}: ${r.value.subs}` : `${r.reason}`).join("\n\\-\\-\\-\n"))}`, {
+    const message = `Daily report for ${day.toFormat("yyyy\\-MM\\-dd")}:\n\n${await results.then(r => r.map(r => r.status === "fulfilled" ? `${r.value.username.replaceAll("-", "\\-").replaceAll("_", "\\_")}: ${r.value.subs}` : `${r.reason}`).join("\n\\-\\-\\-\n"))}`
+    bot.api.sendMessage("7403177717", message.replaceAll("!", "\\!"), {
         parse_mode: "MarkdownV2"
     })
 
