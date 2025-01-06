@@ -1,4 +1,5 @@
 import PocketBase from "npm:pocketbase";
+import { TypedPocketBase } from "~/lib/pb-types.ts";
 
 const PB_TOKEN = Deno.env.get("PB_TOKEN");
 const PB_URL = Deno.env.get("PB_URL");
@@ -9,7 +10,7 @@ if (!PB_TOKEN || !PB_URL) {
 
 const token = PB_TOKEN;
 
-const pb = new PocketBase(PB_URL);
+const pb = new PocketBase(PB_URL) as TypedPocketBase;
 
 pb.authStore.save(token, null);
 

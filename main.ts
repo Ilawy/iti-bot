@@ -1,12 +1,15 @@
-import { createBot } from "npm:@discordeno/bot@19.0.0";
-import { getRandomProblem, lc, markProblemAsSent } from "./lib/leet.ts";
-import { Hono } from "npm:hono";
-import { bearerAuth } from "npm:hono/bearer-auth";
-import { renderProblem } from "./lib/genpic.tsx";
-import { Problem } from "npm:leetcode-query";
-import { resultify, toJsonError } from "./lib/types.ts";
-import { FailedToGetProblem, handleQueue, pushQueue } from "./lib/queue.ts";
-import { kv } from "./lib/kv.ts";
+import { createBot } from "@discordeno/bot";
+import { getRandomProblem, markProblemAsSent } from "~/lib/leet.ts";
+import { Hono } from "hono";
+import { bearerAuth } from "hono/bearer-auth";
+import { renderProblem } from "~/lib/genpic.tsx";
+import { Problem } from "leetcode-query";
+import { resultify, toJsonError } from "~/lib/types.ts";
+import queue from "~/lib/queue.ts";
+import { logger } from 'hono/logger'
+import { retry } from "@std/async"
+
+import { kv } from "~/lib/kv.ts";
 
 const DISCORD_TOKEN = Deno.env.get("DISCORD_TOKEN");
 const DISCORD_CHANNEL = Deno.env.get("DISCORD_CHANNEL");
@@ -27,91 +30,87 @@ const bot = createBot({
   },
 });
 
-const threeMinuteCron = "*/3 * * * *";
 const everyDayAt6PM = "0 16 * * *";
 
 async function task_leetcode() {
   //problem
-  const problemResult = await getRandomProblem();
-  if (problemResult.isErr()) {
-    await pushQueue(
-      {
-        type: "failed-to-get-problem",
-        error: toJsonError(problemResult.error),
-      } satisfies FailedToGetProblem,
-    );
-    return; // will be handled by the queue
-  }
-  const problem = problemResult.value;
+  const problem = await retry(async () => {
+    const result = await getRandomProblem();
+    if (result.isErr()) {
+      throw result.error;
+    }
+    return result.value
+  })
 
   //problem image
-  const problemImageResult = await resultify(renderProblem(
-    problem as unknown as Problem,
-    new Date(),
-  ));
-  if (problemImageResult.isErr()) {
-    await pushQueue({
-      type: "failed-to-get-image",
-      error: toJsonError(problemImageResult.error),
-      problem,
-    });
-    console.log(problemImageResult.error);
-    return; // will be handled by the queue
-  }
-  const problemImage = problemImageResult.value;
+  const problemImage = await retry(async () => {
+    const result = await resultify(renderProblem(
+      problem as unknown as Problem,
+      new Date(),
+    ));
+    if (result.isErr()) {
+      throw result.error;
+    }
+    return result.value;
+  })
 
-  const messageResult = await resultify(
-    bot.helpers.sendMessage(DISCORD_CHANNEL!, {
-      content: `Problem time!  
-[${problem.title}](https://leetcode.com/problems/${problem.titleSlug}/description/)`,
-      files: [{
-        name: `${problem.titleSlug}.png`,
-        blob: new Blob([problemImage], {
-          type: "image/png",
-        }),
-      }],
-    }),
-  );
-  if (messageResult.isErr()) {
-    pushQueue({
-      type: "failed-to-send-problem",
-      error: toJsonError(messageResult.error),
-      problem,
-    });
-    return; // will be handled by the queue
-  }
-  const message = messageResult.value;
+
+  const message = await retry(async () => {
+    const result = await resultify(
+      bot.helpers.sendMessage(DISCORD_CHANNEL!, {
+        content: `Problem time!  
+  [${problem.title}](https://leetcode.com/problems/${problem.titleSlug}/description/)`,
+        files: [{
+          name: `${problem.titleSlug}.png`,
+          blob: new Blob([problemImage], {
+            type: "image/png",
+          }),
+        }],
+      }),
+    );
+    if (result.isErr()) {
+      throw result.error;
+    }
+    return result.value;
+  });
 
   //mark problem as sent
-  const markResult = await resultify(
-    markProblemAsSent(problem, message.id.toString()),
-  );
-  if (markResult.isErr()) {
-    await pushQueue({
-      type: "failed-to-mark-problem-as-sent",
-      error: toJsonError(markResult.error),
-      problem,
-      message_id: message.id.toString(),
-    });
-    return; // will be handled by the queue
-  }
+  await retry(async () => {
+    const markResult = await resultify(
+      markProblemAsSent(problem, message.id.toString()),
+    );
+    if (markResult.isErr()) {
+      throw markResult.error;
+    }
+  })
 }
 
 Deno.cron("Daily leetcode", everyDayAt6PM, task_leetcode);
 
-kv.listenQueue(handleQueue);
+kv.listenQueue(queue.handler.bind(queue));
 
 const app = new Hono();
+
+app.use(logger())
 
 app.basePath("/api")
   .use(bearerAuth({
     verifyToken(token) {
       return token === Deno.env.get("API_TOKEN");
     },
-  })).get("/leetcode/send", async (c) => {
+  }))
+  .get("/leetcode/send", async (c) => {
     await task_leetcode();
     return c.json({});
-  });
+  })
+  .get("/leetcode/report", async (c) => {
+    queue.enqueue({
+      type: "daily-report",
+      date: new Date(),
+      created_at: new Date(),
+    })
+    return c.text("NOT BAD")
+  })
 
 app.get("/api/leetcode/send", async (c) => {
   await task_leetcode();

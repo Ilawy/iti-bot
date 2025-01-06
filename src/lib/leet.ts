@@ -1,8 +1,8 @@
-import { LeetCode, ProblemList } from "npm:leetcode-query";
-import {  Err, Ok, Result } from "npm:ts-results-es";
-import pb from "./db.ts";
-import { DIFFICULTY_KEY, kv, TOTAL_PROBLEMS_OF_KEY } from "./kv.ts";
-import { Difficulty, Problem, resultify } from "./types.ts";
+import { LeetCode, ProblemList } from "leetcode-query";
+import { Err, Ok, Result } from "ts-results-es";
+import pb from "~/lib/db.ts";
+import { DIFFICULTY_KEY, kv, TOTAL_PROBLEMS_OF_KEY } from "~/lib/kv.ts";
+import { Difficulty, Problem, resultify } from "~/lib/types.ts";
 import { ClientResponseError, RecordModel } from "npm:pocketbase";
 
 
@@ -69,12 +69,12 @@ export async function getRandomProblem(
             const totalResult3 = await resultify(
                 kv.set(TOTAL_PROBLEMS_OF_KEY(DIFFICULTY), totalResult2.value),
             )
-            if(totalResult3.isErr()) {
+            if (totalResult3.isErr()) {
                 console.log(totalResult3.error);
                 return totalResult3;
             }
             TOTAL = totalResult2.value;
-        }else{
+        } else {
             TOTAL = totalResult.value.value;
         }
     }
