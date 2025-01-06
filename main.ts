@@ -31,7 +31,7 @@ const bot = createBot({
 });
 
 const everyDayAt6PM = "0 16 * * *";
-const everyDayAt10PM = "0 22 * * *";
+const everyDayAt10PM = "0 19 * * *";
 
 
 async function task_leetcode() {
