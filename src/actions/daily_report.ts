@@ -7,6 +7,7 @@ import { z } from "zod";
 //@deno-types="@types/luxon"
 import { DateTime } from 'luxon'
 import bot from "~/lib/tg.ts";
+import { logger } from "~/lib/logger.ts";
 
 const AcceptedSubmission = z.object({
     id: z.string(),
@@ -70,7 +71,7 @@ export default async function daily_report(raw_day: Date): Promise<Result<any, E
     const results = await Promise.allSettled(users.map(async user => {
         const acs = await resultify(getAcceptedByUsername(user.leetcode))
         if (acs.isErr()) {
-            console.error(acs.error)
+            logger.error(acs.error.message)
             throw acs.error
         }
 
@@ -93,7 +94,7 @@ export default async function daily_report(raw_day: Date): Promise<Result<any, E
 
     const put_result = await resultify(pb.collection("daily_reports").create(data))
     if(put_result.isErr()){
-        console.error(`unable to upload daily report ${formattedDate}`);
+        logger.error(`unable to upload daily report ${formattedDate}`);
     }
 
     const message = `Daily report for ${day.toFormat("yyyy\\-MM\\-dd")}:\n\n${results.map(r => r.status === "fulfilled" ? `${r.value.username.replaceAll("-", "\\-").replaceAll("_", "\\_")}: ${r.value.subs}` : `${r.reason}`).join("\n\\-\\-\\-\n")}`

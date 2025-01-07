@@ -4,6 +4,7 @@ import pb from "~/lib/db.ts";
 import { DIFFICULTY_KEY, kv, TOTAL_PROBLEMS_OF_KEY } from "~/lib/kv.ts";
 import { Difficulty, Problem, resultify } from "~/lib/types.ts";
 import { ClientResponseError, RecordModel } from "npm:pocketbase";
+import { logger } from "~/lib/logger.ts";
 
 
 
@@ -39,7 +40,7 @@ export async function getRandomProblem(
             kv.get<Difficulty>(DIFFICULTY_KEY),
         );
         if (difficultyResult.isErr()) {
-            console.log(difficultyResult.error);
+            logger.error(difficultyResult.error);
             return difficultyResult;
         }
         DIFFICULTY = difficultyResult.value.value ?? "EASY";
@@ -54,7 +55,7 @@ export async function getRandomProblem(
             kv.get<number>(TOTAL_PROBLEMS_OF_KEY(DIFFICULTY)),
         );
         if (totalResult.isErr()) {
-            console.log(totalResult.error);
+            logger.error(totalResult.error);
             return totalResult;
         }
         if (!totalResult.value.value) {
@@ -63,14 +64,14 @@ export async function getRandomProblem(
                 limit: 1,
             }).then(d => d.total))
             if (totalResult2.isErr()) {
-                console.log(totalResult2.error);
+                logger.error(totalResult2.error);
                 return totalResult2;
             }
             const totalResult3 = await resultify(
                 kv.set(TOTAL_PROBLEMS_OF_KEY(DIFFICULTY), totalResult2.value),
             )
             if (totalResult3.isErr()) {
-                console.log(totalResult3.error);
+                logger.error(totalResult3.error);
                 return totalResult3;
             }
             TOTAL = totalResult2.value;
@@ -92,7 +93,7 @@ export async function getRandomProblem(
         limit: 1,
     }));
     if (problemResult.isErr()) {
-        console.log(problemResult.error);
+        logger.error(problemResult.error);
         return problemResult;
     }
     const problem = problemResult.value.questions[0];

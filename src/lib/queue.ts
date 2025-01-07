@@ -2,6 +2,7 @@ import { JsonError, Problem } from "~/lib/types.ts";
 import { kv } from "~/lib/kv.ts";
 import { z } from "zod";
 import daily_report from "~/actions/daily_report.ts";
+import { logger } from "~/lib/logger.ts";
 
 const DailyReportMessage = z.object({
     type: z.literal("daily-report"),
@@ -22,19 +23,19 @@ class Queue {
     async handler(unsafe_message: any) {
         const messageResult = QueueMessage.safeParse(unsafe_message);
         if (!messageResult.success) {
-            console.error(`Invalid message: ${unsafe_message}`);
+            logger.error(`Invalid message: ${unsafe_message}`);
             return;
         }
         const message = messageResult.data;
 
         switch (message.type) {
             case "daily-report":
-                console.log(`Daily report for ${message.date}`);
+                logger.log(`Daily report for ${message.date}`);
                 await daily_report(message.date);
-                console.log("Daily report sent");
+                logger.log("Daily report sent");
                 break;
             default:
-                console.error(`Unknown message type: ${message.type}`);
+                logger.error(`Unknown message type: ${message.type}`);
                 break;
         }
 
