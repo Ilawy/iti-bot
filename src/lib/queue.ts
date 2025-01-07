@@ -1,4 +1,3 @@
-import { JsonError, Problem } from "~/lib/types.ts";
 import { kv } from "~/lib/kv.ts";
 import { z } from "zod";
 import daily_report from "~/actions/daily_report.ts";
@@ -20,7 +19,7 @@ export type QueueMessage = z.infer<typeof QueueMessage>
 class Queue {
 
 
-    async handler(unsafe_message: any) {
+    async handler(unsafe_message: unknown) {
         const messageResult = QueueMessage.safeParse(unsafe_message);
         if (!messageResult.success) {
             logger.error(`Invalid message: ${unsafe_message}`);

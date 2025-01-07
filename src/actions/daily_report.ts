@@ -52,7 +52,7 @@ async function getUserSubmissionsForDate(username: string, unsafe_date: Date) {
         }
     }).then(d => SubmissionsCalendar.parse(JSON.parse(d.data.matchedUser.userCalendar.submissionCalendar)))
 
-    const countOfDay = Object.entries(result).find(([k, v]) => {
+    const countOfDay = Object.entries(result).find(([k, _v]) => {
         const day = DateTime.fromSeconds(Number(k), { zone: "UTC" })
         return day.hasSame(date, "day")
     })
