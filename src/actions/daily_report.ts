@@ -14,21 +14,49 @@ const AcceptedSubmission = z.object({
     timestamp: z.string().transform(d => DateTime.fromSeconds(Number(d)).setZone("UTC"))
 })
 
+const SubmissionsCalendar = z.record(z.string(), z.number().positive())
+
 async function getAcceptedByUsername(username: string) {
     return await lc.graphql({
-        query: /* gql */`query recentAcSubmissions($username: String!, $limit: Int!) {
-        recentAcSubmissionList(username: $username, limit: $limit) {
-            id
-            titleSlug
-            timestamp
-        }
-    }`,
+        query: /* gql */
+            `query recentAcSubmissions($username: String!, $limit: Int!) {
+                recentAcSubmissionList(username: $username, limit: $limit) {
+                    id
+                    titleSlug
+                    timestamp
+                }
+            }`,
         variables: {
             username,
             limit: 20
         }
     }).then(d => d.data.recentAcSubmissionList).then(subs => AcceptedSubmission.array().parse(subs))
+}
 
+async function getUserSubmissionsForDate(username: string, unsafe_date: Date) {
+    const date = DateTime.fromJSDate(unsafe_date).setZone("UTC")
+    if (!date.isValid) throw new Error("Invalid date")
+    const result = await lc.graphql({
+        query:
+            `query userProfileCalendar($username: String!, $year: Int) {
+                    matchedUser(username: $username) {
+                        userCalendar(year: $year) {
+                            submissionCalendar
+                        }
+                    }
+                }`,
+        variables: {
+            username,
+            year: date.year
+        }
+    }).then(d => SubmissionsCalendar.parse(JSON.parse(d.data.matchedUser.userCalendar.submissionCalendar)))
+
+    const countOfDay = Object.entries(result).find(([k, v]) => {
+        const day = DateTime.fromSeconds(Number(k), { zone: "UTC" })
+        return day.hasSame(date, "day")
+    })
+    if (!countOfDay) return 0;
+    return countOfDay[1];
 }
 
 
@@ -65,3 +93,4 @@ export default async function daily_report(raw_day: Date): Promise<Result<any, E
 
 
 
+await getUserSubmissionsForDate("ilawy", new Date("2025-01-30"))
