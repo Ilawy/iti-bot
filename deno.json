@@ -1,7 +1,7 @@
 {
     "nodeModulesDir": "auto",
     "tasks": {
-        "typegen": "deno run -A npm:pocketbase-typegen --env --out ./lib/pb-types.ts"
+        "typegen": "deno run -A --allow-scripts npm:pocketbase-typegen --env --out ./src/lib/pb-types.ts"
     },
     "imports": {
         "@std/async": "jsr:@std/async@^1.0.9",

@@ -11,6 +11,7 @@ export enum Collections {
 	Mfas = "_mfas",
 	Otps = "_otps",
 	Superusers = "_superusers",
+	DailyReports = "daily_reports",
 	LeetcodeSubmissions = "leetcode_submissions",
 	Problems = "problems",
 	Students = "students",
@@ -88,6 +89,14 @@ export type SuperusersRecord = {
 	verified?: boolean
 }
 
+export type DailyReportsRecord = {
+	created?: IsoDateString
+	date: string
+	file?: string
+	id: string
+	updated?: IsoDateString
+}
+
 export enum LeetcodeSubmissionsStatusOptions {
 	"GREEN" = "GREEN",
 	"RED" = "RED",
@@ -140,6 +149,7 @@ export type ExternalauthsResponse<Texpand = unknown> = Required<ExternalauthsRec
 export type MfasResponse<Texpand = unknown> = Required<MfasRecord> & BaseSystemFields<Texpand>
 export type OtpsResponse<Texpand = unknown> = Required<OtpsRecord> & BaseSystemFields<Texpand>
 export type SuperusersResponse<Texpand = unknown> = Required<SuperusersRecord> & AuthSystemFields<Texpand>
+export type DailyReportsResponse<Texpand = unknown> = Required<DailyReportsRecord> & BaseSystemFields<Texpand>
 export type LeetcodeSubmissionsResponse<Texpand = unknown> = Required<LeetcodeSubmissionsRecord> & BaseSystemFields<Texpand>
 export type ProblemsResponse<Tsubmitted_by = unknown, Texpand = unknown> = Required<ProblemsRecord<Tsubmitted_by>> & BaseSystemFields<Texpand>
 export type StudentsResponse<Texpand = unknown> = Required<StudentsRecord> & BaseSystemFields<Texpand>
@@ -153,6 +163,7 @@ export type CollectionRecords = {
 	_mfas: MfasRecord
 	_otps: OtpsRecord
 	_superusers: SuperusersRecord
+	daily_reports: DailyReportsRecord
 	leetcode_submissions: LeetcodeSubmissionsRecord
 	problems: ProblemsRecord
 	students: StudentsRecord
@@ -165,6 +176,7 @@ export type CollectionResponses = {
 	_mfas: MfasResponse
 	_otps: OtpsResponse
 	_superusers: SuperusersResponse
+	daily_reports: DailyReportsResponse
 	leetcode_submissions: LeetcodeSubmissionsResponse
 	problems: ProblemsResponse
 	students: StudentsResponse
@@ -180,6 +192,7 @@ export type TypedPocketBase = PocketBase & {
 	collection(idOrName: '_mfas'): RecordService<MfasResponse>
 	collection(idOrName: '_otps'): RecordService<OtpsResponse>
 	collection(idOrName: '_superusers'): RecordService<SuperusersResponse>
+	collection(idOrName: 'daily_reports'): RecordService<DailyReportsResponse>
 	collection(idOrName: 'leetcode_submissions'): RecordService<LeetcodeSubmissionsResponse>
 	collection(idOrName: 'problems'): RecordService<ProblemsResponse>
 	collection(idOrName: 'students'): RecordService<StudentsResponse>

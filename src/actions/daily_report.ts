@@ -67,7 +67,7 @@ export default async function daily_report(raw_day: Date): Promise<Result<any, E
     const users = usersResult.value;
     //use node cluster
 
-    const results = Promise.allSettled(users.map(async user => {
+    const results = await Promise.allSettled(users.map(async user => {
         const acs = await resultify(getAcceptedByUsername(user.leetcode))
         if (acs.isErr()) {
             console.error(acs.error)
@@ -80,7 +80,23 @@ export default async function daily_report(raw_day: Date): Promise<Result<any, E
             username: user.leetcode
         }
     }))
-    const message = `Daily report for ${day.toFormat("yyyy\\-MM\\-dd")}:\n\n${await results.then(r => r.map(r => r.status === "fulfilled" ? `${r.value.username.replaceAll("-", "\\-").replaceAll("_", "\\_")}: ${r.value.subs}` : `${r.reason}`).join("\n\\-\\-\\-\n"))}`
+
+   
+    const formattedDate = day.toFormat("yyyy-MM-dd");
+    const results_file = new File([JSON.stringify(results.filter(r=>r.status === "fulfilled").map(r=>r.value))], `${formattedDate}.json`, {
+        type: "application/json"
+    })
+
+    const data = new FormData();
+    data.set("date", formattedDate)
+    data.set("file", results_file)
+
+    const put_result = await resultify(pb.collection("daily_reports").create(data))
+    if(put_result.isErr()){
+        console.error(`unable to upload daily report ${formattedDate}`);
+    }
+
+    const message = `Daily report for ${day.toFormat("yyyy\\-MM\\-dd")}:\n\n${results.map(r => r.status === "fulfilled" ? `${r.value.username.replaceAll("-", "\\-").replaceAll("_", "\\_")}: ${r.value.subs}` : `${r.reason}`).join("\n\\-\\-\\-\n")}`
     bot.api.sendMessage("7403177717", message.replaceAll("!", "\\!"), {
         parse_mode: "MarkdownV2"
     })
@@ -92,5 +108,3 @@ export default async function daily_report(raw_day: Date): Promise<Result<any, E
 
 
 
-
-await getUserSubmissionsForDate("ilawy", new Date("2025-01-30"))
