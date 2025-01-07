@@ -32,6 +32,7 @@ const bot = createBot({
 
 const everyDayAt6PM = "0 16 * * *";
 const everyDayAt10PM = "0 21 * * *";
+const everyHalfHour = "*/30 * * * *";
 
 
 async function task_leetcode() {
@@ -88,7 +89,7 @@ async function task_leetcode() {
 }
 
 Deno.cron("Daily leetcode", everyDayAt6PM, task_leetcode);
-Deno.cron("Daily report", everyDayAt10PM, () => {
+Deno.cron("Daily report", everyHalfHour, () => {
   queue.enqueue({
     type: "daily-report",
     date: new Date(),
