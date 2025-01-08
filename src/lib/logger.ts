@@ -1,48 +1,75 @@
+import { z } from "zod";
+import pb from "~/lib/db.ts";
+import { LogLevel } from "~/lib/types.ts";
+import queue, { LoggerMessage } from "./queue.ts";
+
 class Logger {
-    constructor(private topic: string) {
-    }
-    // deno-lint-ignore require-await
-    async info(message: string) {
-        console.log(message);
-    }
+  constructor(private topic: string) {
+  }
 
-    get log(){
-        return this.info.bind(this)
-    }
+  async $queue_action(event: LoggerMessage){
+    const localFn = event.level === "INFO" ? console.log.bind(console) : event.level === "WARN" ? console.warn.bind(console) : console.error.bind(console);
+    localFn(event.message)
+    await this.sendPBLog(event.level, event.message);
+    await this.ntfyLog(event.level, event.message);
+    
+  }
 
-    async warning(message: string | Error) {
-        console.warn("[WARN]", message.toString());
-        try {
-            await fetch(`https://ntfy.sh/${this.topic}`, {
-                method: "POST",
-                body: message.toString(),
-                headers: {
-                    "Title": "ITI Bot Warning",
-                    "Priority": "high",
-                    "Tags": "warning,skull",
-                },
-            });
-        } catch {}
-    }
+  async sendPBLog(level: LogLevel, message: string) {
+    const url = new URL("/logger", pb.baseURL);
+    url.searchParams.set("message", message);
+    url.searchParams.set("type", level);
+    await pb.send("/logger", {
+        method: "POST",
+        query: {
+            message,
+            level
+        }
+    })
+  }
 
-    async error(message: string | Error){
-        console.error(message.toString());
-        try {
-            await fetch(`https://ntfy.sh/${this.topic}`, {
-                method: "POST",
-                body: message.toString(),
-                headers: {
-                    "Title": "ITI Bot Error",
-                    "Priority": "urgent",
-                    "Tags": "warning,skull",
-                },
-            });
-        } catch {}
-    }
+  async ntfyLog(level: LogLevel, message: string){
+    await fetch(`https://ntfy.sh/${this.topic}`, {
+        method: "POST",
+        body: message.toString(),
+        headers: {
+          "Title": `${level}`,
+          "Priority": level === "ERROR" ? "urgent" : level === "WARN" ? "high" : "default",
+        },
+      });
+  }
+
+  info(message: string) {
+    queue.enqueue({
+        type: "logger-message",
+        level: "INFO",
+        message,
+    })    
+  }
+
+  get log() {
+    return this.info.bind(this);
+  }
+
+  warning(message: string | Error) {
+    queue.enqueue({
+        type: "logger-message",
+        level: "WARN",
+        message: message.toString(),
+    })
+  }
+
+  error(message: string | Error) {
+    queue.enqueue({
+        type: "logger-message",
+        level: "ERROR",
+        message: message.toString(),
+    })
+  }
 }
 
-if(!Deno.env.has("NTFY_TOPIC")){
-    throw new Error("ENV variable is required (NTFY_TOPIC)")
+if (!Deno.env.has("NTFY_TOPIC")) {
+  throw new Error("ENV variable is required (NTFY_TOPIC)");
 }
 
-export const logger = new Logger(Deno.env.get("NTFY_TOPIC")!)
+export const logger = new Logger(Deno.env.get("NTFY_TOPIC")!);

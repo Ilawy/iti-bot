@@ -1,5 +1,6 @@
 import { Err, Ok, Result } from "npm:ts-results-es";
 import { ProblemList } from "npm:leetcode-query";
+import { z } from "zod";
 
 export type Difficulty = "EASY" | "MEDIUM" | "HARD";
 export type Problem = ProblemList["questions"][number];
@@ -29,3 +30,12 @@ export async function resultify<T, E = Error>(
         return Err(e as E);
     }
 }
+
+
+export const LogLevel = z.union([
+    z.literal("INFO"),
+    z.literal("WARN"),
+    z.literal("ERROR"),
+  ]);
+  export type LogLevel = z.infer<typeof LogLevel>;
+  

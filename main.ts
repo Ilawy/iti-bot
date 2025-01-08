@@ -6,16 +6,20 @@ import { renderProblem } from "~/lib/genpic.tsx";
 import { Problem } from "leetcode-query";
 import { resultify, toJsonError } from "~/lib/types.ts";
 import queue from "~/lib/queue.ts";
-import { logger } from 'hono/logger'
-import { retry } from "@std/async"
+import { logger as loggerMiddleware } from "hono/logger";
+import { retry } from "@std/async";
 
 import { kv } from "~/lib/kv.ts";
+import pb from "~/lib/db.ts";
+import { logger } from "~/lib/logger.ts";
 
 const DISCORD_TOKEN = Deno.env.get("DISCORD_TOKEN");
 const DISCORD_CHANNEL = Deno.env.get("DISCORD_CHANNEL");
 const API_TOKEN = Deno.env.get("API_TOKEN");
 if (!DISCORD_TOKEN || !DISCORD_CHANNEL || !API_TOKEN) {
-  throw new Error("Missing env vars (DISCORD_TOKEN, DISCORD_CHANNEL, API_TOKEN)");
+  throw new Error(
+    "Missing env vars (DISCORD_TOKEN, DISCORD_CHANNEL, API_TOKEN)",
+  );
 }
 
 const bot = createBot({
@@ -34,7 +38,6 @@ const everyDayAt6PM = "0 16 * * *";
 const everyDayAt10PM = "0 21 * * *";
 const everyHalfHour = "*/30 * * * *";
 
-
 async function task_leetcode() {
   //problem
   const problem = await retry(async () => {
@@ -42,8 +45,8 @@ async function task_leetcode() {
     if (result.isErr()) {
       throw result.error;
     }
-    return result.value
-  })
+    return result.value;
+  });
 
   //problem image
   const problemImage = await retry(async () => {
@@ -55,8 +58,7 @@ async function task_leetcode() {
       throw result.error;
     }
     return result.value;
-  })
-
+  });
 
   const message = await retry(async () => {
     const result = await resultify(
@@ -85,7 +87,7 @@ async function task_leetcode() {
     if (markResult.isErr()) {
       throw markResult.error;
     }
-  })
+  });
 }
 
 Deno.cron("Daily leetcode", everyDayAt6PM, task_leetcode);
@@ -94,14 +96,14 @@ Deno.cron("Daily report", everyHalfHour, () => {
     type: "daily-report",
     date: new Date(),
     created_at: new Date(),
-  })
-})
+  });
+});
 
 kv.listenQueue(queue.handler.bind(queue));
 
 const app = new Hono();
 
-app.use(logger())
+app.use(loggerMiddleware());
 
 app.basePath("/api")
   .use(bearerAuth({
@@ -118,14 +120,16 @@ app.basePath("/api")
       type: "daily-report",
       date: new Date(),
       created_at: new Date(),
-    })
-    return c.text("NOT BAD")
-  })
+    });
+    return c.text("NOT BAD");
+  });
 
 app.get("/api/leetcode/send", async (c) => {
   await task_leetcode();
   return c.json({});
 });
+
+
 
 Deno.serve({ port: 8000 }, app.fetch);
 
