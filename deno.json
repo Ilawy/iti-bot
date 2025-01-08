@@ -2,7 +2,7 @@
     "nodeModulesDir": "auto",
     "tasks": {
         "typegen": "deno run -A --allow-scripts npm:pocketbase-typegen --env --out ./src/lib/pb-types.ts",
-        "db:start": "pocketbase serve --hooksDir ./.local/hooks --dir ./.local/data"
+        "db:start": "pocketbase serve --hooksDir ./pb_hooks --dir ./.local/data"
     },
     "imports": {
         "@std/async": "jsr:@std/async@^1.0.9",
