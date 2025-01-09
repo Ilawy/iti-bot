@@ -6,6 +6,7 @@
     },
     "imports": {
         "@std/async": "jsr:@std/async@^1.0.9",
+        "@std/cli": "jsr:@std/cli@^1.0.9",
         "@types/luxon": "npm:@types/luxon@^3.4.2",
         "grammy": "npm:grammy@^1.34.0",
         "luxon": "npm:luxon@^3.5.0",

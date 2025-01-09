@@ -2,6 +2,7 @@ import { z } from "zod";
 import pb from "~/lib/db.ts";
 import { LogLevel } from "~/lib/types.ts";
 import queue, { LoggerMessage } from "./queue.ts";
+import { getENV } from "~/lib/env.ts";
 
 class Logger {
   constructor(private topic: string) {
@@ -68,8 +69,7 @@ class Logger {
   }
 }
 
-if (!Deno.env.has("NTFY_TOPIC")) {
-  throw new Error("ENV variable is required (NTFY_TOPIC)");
-}
 
-export const logger = new Logger(Deno.env.get("NTFY_TOPIC")!);
+const NTFY_TOPIC = getENV("NTFY_TOPIC");
+
+export const logger = new Logger(NTFY_TOPIC);

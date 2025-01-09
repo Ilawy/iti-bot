@@ -1,9 +1,7 @@
 import { Bot } from 'grammy'
+import { getENV } from "~/lib/env.ts";
 
-if (!Deno.env.has("TG_TOKEN")) {
-    throw new Error("Missing env var (TG_TOKEN)");
-}
 
-const bot = new Bot(Deno.env.get("TG_TOKEN")!);
+const bot = new Bot(getENV("TG_TOKEN"));
 
 export default bot

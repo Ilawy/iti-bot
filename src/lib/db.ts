@@ -1,12 +1,9 @@
 import PocketBase from "npm:pocketbase";
 import { TypedPocketBase } from "~/lib/pb-types.ts";
+import { getENV } from "~/lib/env.ts";
 
-const PB_TOKEN = Deno.env.get("PB_TOKEN");
-const PB_URL = Deno.env.get("PB_URL");
-
-if (!PB_TOKEN || !PB_URL) {
-    throw new Error("Missing env vars (PB_TOKEN, PB_URL)");
-}
+const PB_TOKEN = getENV("PB_TOKEN");
+const PB_URL = getENV("PB_URL");
 
 const token = PB_TOKEN;
 

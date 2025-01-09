@@ -12,85 +12,17 @@ import { retry } from "@std/async";
 import { kv } from "~/lib/kv.ts";
 import pb from "~/lib/db.ts";
 import { logger } from "~/lib/logger.ts";
+import { getENV } from "~/lib/env.ts";
 
-const DISCORD_TOKEN = Deno.env.get("DISCORD_TOKEN");
-const DISCORD_CHANNEL = Deno.env.get("DISCORD_CHANNEL");
-const API_TOKEN = Deno.env.get("API_TOKEN");
-if (!DISCORD_TOKEN || !DISCORD_CHANNEL || !API_TOKEN) {
-  throw new Error(
-    "Missing env vars (DISCORD_TOKEN, DISCORD_CHANNEL, API_TOKEN)",
-  );
-}
-
-const bot = createBot({
-  token: DISCORD_TOKEN,
-  events: {
-    ready: ({ shardId }) => console.log(`Shard ${shardId} ready`),
-  },
-  desiredProperties: {
-    message: {
-      id: true,
-    },
-  },
-});
 
 const everyDayAt6PM = "0 16 * * *";
 const everyDayAt10PM = "0 21 * * *";
 const everyHalfHour = "*/30 * * * *";
 
-async function task_leetcode() {
-  //problem
-  const problem = await retry(async () => {
-    const result = await getRandomProblem();
-    if (result.isErr()) {
-      throw result.error;
-    }
-    return result.value;
-  });
 
-  //problem image
-  const problemImage = await retry(async () => {
-    const result = await resultify(renderProblem(
-      problem as unknown as Problem,
-      new Date(),
-    ));
-    if (result.isErr()) {
-      throw result.error;
-    }
-    return result.value;
-  });
-
-  const message = await retry(async () => {
-    const result = await resultify(
-      bot.helpers.sendMessage(DISCORD_CHANNEL!, {
-        content: `Problem time!  
-  [${problem.title}](https://leetcode.com/problems/${problem.titleSlug}/description/)`,
-        files: [{
-          name: `${problem.titleSlug}.png`,
-          blob: new Blob([problemImage], {
-            type: "image/png",
-          }),
-        }],
-      }),
-    );
-    if (result.isErr()) {
-      throw result.error;
-    }
-    return result.value;
-  });
-
-  //mark problem as sent
-  await retry(async () => {
-    const markResult = await resultify(
-      markProblemAsSent(problem, message.id.toString()),
-    );
-    if (markResult.isErr()) {
-      throw markResult.error;
-    }
-  });
-}
-
-Deno.cron("Daily leetcode", everyDayAt6PM, task_leetcode);
+Deno.cron("Daily leetcode", everyDayAt6PM, ()=>{
+ 
+});
 Deno.cron("Daily report", everyHalfHour, () => {
   queue.enqueue({
     type: "daily-report",
@@ -108,11 +40,13 @@ app.use(loggerMiddleware());
 app.basePath("/api")
   .use(bearerAuth({
     verifyToken(token) {
-      return token === Deno.env.get("API_TOKEN");
+      return token === getENV("API_TOKEN");
     },
   }))
   .get("/leetcode/send", async (c) => {
-    await task_leetcode();
+    queue.enqueue({
+      type: "daily-task"
+    })
     return c.json({});
   })
   .get("/leetcode/report", async (c) => {
@@ -123,12 +57,6 @@ app.basePath("/api")
     });
     return c.text("NOT BAD");
   });
-
-app.get("/api/leetcode/send", async (c) => {
-  await task_leetcode();
-  return c.json({});
-});
-
 
 
 Deno.serve({ port: 8000 }, app.fetch);
