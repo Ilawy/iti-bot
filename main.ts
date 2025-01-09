@@ -14,14 +14,14 @@ import pb from "~/lib/db.ts";
 import { logger } from "~/lib/logger.ts";
 import { getENV } from "~/lib/env.ts";
 
-
 const everyDayAt6PM = "0 16 * * *";
 const everyDayAt10PM = "0 21 * * *";
 // const everyHalfHour = "*/30 * * * *";
 
-
-Deno.cron("Daily leetcode", everyDayAt6PM, ()=>{
- 
+Deno.cron("Daily leetcode", everyDayAt6PM, () => {
+  queue.enqueue({
+    type: "daily-task",
+  });
 });
 Deno.cron("Daily report", everyDayAt10PM, () => {
   queue.enqueue({
@@ -45,8 +45,8 @@ app.basePath("/api")
   }))
   .get("/leetcode/send", async (c) => {
     queue.enqueue({
-      type: "daily-task"
-    })
+      type: "daily-task",
+    });
     return c.json({});
   })
   .get("/leetcode/report", async (c) => {
@@ -57,7 +57,6 @@ app.basePath("/api")
     });
     return c.text("NOT BAD");
   });
-
 
 Deno.serve({ port: 8000 }, app.fetch);
 

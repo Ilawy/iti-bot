@@ -1,22 +1,22 @@
 {
-    "nodeModulesDir": "auto",
-    "tasks": {
-        "typegen": "deno run -A --allow-scripts npm:pocketbase-typegen --env --out ./src/lib/pb-types.ts",
-        "db:start": "pocketbase serve --hooksDir ./pb_hooks --dir ./.local/data"
-    },
-    "imports": {
-        "@std/async": "jsr:@std/async@^1.0.9",
-        "@std/cli": "jsr:@std/cli@^1.0.9",
-        "@types/luxon": "npm:@types/luxon@^3.4.2",
-        "grammy": "npm:grammy@^1.34.0",
-        "luxon": "npm:luxon@^3.5.0",
-        "zod": "npm:zod@^3.24.1",
-        "~/": "./src/",
-        "@discordeno/bot": "npm:@discordeno/bot@^21.0.0",
-        "discordeno": "npm:discordeno@^21.0.0",
-        "hono": "npm:hono@^4.6.16",
-        "leetcode-query": "npm:leetcode-query@^1.2.3",
-        "pocketbase": "npm:pocketbase@^0.25.0",
-        "ts-results-es": "npm:ts-results-es@^4.2.0"
-    }
+  "nodeModulesDir": "auto",
+  "tasks": {
+    "typegen": "deno run -A --allow-scripts npm:pocketbase-typegen --env --out ./src/lib/pb-types.ts",
+    "db:start": "pocketbase serve --hooksDir ./pb_hooks --dir ./.local/data"
+  },
+  "imports": {
+    "@std/async": "jsr:@std/async@^1.0.9",
+    "@std/cli": "jsr:@std/cli@^1.0.9",
+    "@types/luxon": "npm:@types/luxon@^3.4.2",
+    "grammy": "npm:grammy@^1.34.0",
+    "luxon": "npm:luxon@^3.5.0",
+    "zod": "npm:zod@^3.24.1",
+    "~/": "./src/",
+    "@discordeno/bot": "npm:@discordeno/bot@^21.0.0",
+    "discordeno": "npm:discordeno@^21.0.0",
+    "hono": "npm:hono@^4.6.16",
+    "leetcode-query": "npm:leetcode-query@^1.2.3",
+    "pocketbase": "npm:pocketbase@^0.25.0",
+    "ts-results-es": "npm:ts-results-es@^4.2.0"
+  }
 }

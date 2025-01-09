@@ -4,7 +4,6 @@ import satori from "npm:satori";
 import { Problem } from "npm:leetcode-query";
 import { render } from "https://deno.land/x/resvg_wasm@0.2.0/mod.ts";
 
-
 const ArialBuffer = await Deno.readFile("./fonts/Arial.ttf");
 
 const COLOR_GREEN = "#3e6";
@@ -41,7 +40,11 @@ const template = ({ title, difficulty }: Problem, today: Date) => (
       <span style={{ fontSize: 24 }}>{title}</span>
       <span
         style={{
-          backgroundColor: difficulty === "Easy" ? COLOR_GREEN : difficulty === "Medium" ? COLOR_YELLOW : COLOR_RED,
+          backgroundColor: difficulty === "Easy"
+            ? COLOR_GREEN
+            : difficulty === "Medium"
+            ? COLOR_YELLOW
+            : COLOR_RED,
           maxWidth: 8 + 10 * difficulty.length,
           padding: "0.25rem 1rem",
           minWidth: 3,
@@ -77,4 +80,3 @@ export async function renderProblem(problem: Problem, today: Date) {
 
   return await render(svg);
 }
-
