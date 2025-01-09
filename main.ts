@@ -17,13 +17,13 @@ import { getENV } from "~/lib/env.ts";
 
 const everyDayAt6PM = "0 16 * * *";
 const everyDayAt10PM = "0 21 * * *";
-const everyHalfHour = "*/30 * * * *";
+// const everyHalfHour = "*/30 * * * *";
 
 
 Deno.cron("Daily leetcode", everyDayAt6PM, ()=>{
  
 });
-Deno.cron("Daily report", everyHalfHour, () => {
+Deno.cron("Daily report", everyDayAt10PM, () => {
   queue.enqueue({
     type: "daily-report",
     date: new Date(),
