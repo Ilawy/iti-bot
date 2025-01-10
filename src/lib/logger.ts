@@ -67,11 +67,16 @@ class Logger {
     });
   }
 
-  error(message: string | Error) {
+  error(message: Error) {
     queue.enqueue({
       type: "logger-message",
       level: "ERROR",
       message: message.toString(),
+      meta: {
+        stack: message.stack,
+        name: message.name,
+        cause: message.cause ? `${message.cause}` : undefined,
+      },
     });
   }
 }

@@ -18,6 +18,7 @@ export const LoggerMessage = z.object({
   type: z.literal("logger-message"),
   message: z.string(),
   level: LogLevel,
+  meta: z.record(z.string(), z.any()).optional(),
 });
 export type LoggerMessage = z.infer<typeof LoggerMessage>;
 
@@ -37,7 +38,7 @@ class Queue {
   async handler(unsafe_message: unknown) {
     const messageResult = QueueMessage.safeParse(unsafe_message);
     if (!messageResult.success) {
-      logger.error(`Invalid message: ${unsafe_message}`);
+      logger.error(new Error(`Invalid message: ${unsafe_message}`));
       return;
     }
     const message = messageResult.data;
@@ -68,7 +69,9 @@ class Queue {
         }
         break;
       default:
-        logger.error(`Unknown message type: ${JSON.stringify(message)}`);
+        logger.error(
+          new Error(`Unknown message type: ${JSON.stringify(message)}`),
+        );
         break;
     }
   }

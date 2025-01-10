@@ -79,7 +79,7 @@ export default async function daily_report(
   const results = await Promise.allSettled(users.map(async (user) => {
     const acs = await resultify(getAcceptedByUsername(user.leetcode));
     if (acs.isErr()) {
-      logger.error(acs.error.message);
+      logger.error(acs.error);
       throw acs.error;
     }
 
@@ -108,7 +108,7 @@ export default async function daily_report(
     pb.collection("daily_reports").create(data),
   );
   if (put_result.isErr()) {
-    logger.error(`unable to upload daily report ${formattedDate}`);
+    logger.error(new Error(`unable to upload daily report ${formattedDate}`));
   }
 
   const message = `Daily report for ${day.toFormat("yyyy\\-MM\\-dd")}:\n\n${
