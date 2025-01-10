@@ -15,11 +15,11 @@ class Logger {
       ? console.warn.bind(console)
       : console.error.bind(console);
     localFn(event.message);
-    await this.sendPBLog(event.level, event.message);
+    await this.sendPBLog(event.level, event.message, event.meta);
     await this.ntfyLog(event.level, event.message);
   }
 
-  async sendPBLog(level: LogLevel, message: string) {
+  async sendPBLog(level: LogLevel, message: string, meta?: LoggerMessage['meta']) {
     const url = new URL("/logger", pb.baseURL);
     url.searchParams.set("message", message);
     url.searchParams.set("type", level);
@@ -28,6 +28,7 @@ class Logger {
       query: {
         message,
         level,
+        meta: JSON.stringify(meta)
       },
     });
   }
