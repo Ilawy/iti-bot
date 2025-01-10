@@ -3,6 +3,7 @@
   "specifiers": {
     "jsr:@std/async@^1.0.9": "1.0.9",
     "jsr:@std/cli@^1.0.9": "1.0.9",
+    "jsr:@std/path@^1.0.8": "1.0.8",
     "npm:@discordeno/bot@19.0.0": "19.0.0",
     "npm:@discordeno/bot@21": "21.0.0",
     "npm:@types/luxon@^3.4.2": "3.4.2",
@@ -28,6 +29,9 @@
     },
     "@std/cli@1.0.9": {
       "integrity": "557e5865af000efbf3f737dcfea5b8ab86453594f4a9cd8d08c9fa83d8e3f3bc"
+    },
+    "@std/path@1.0.8": {
+      "integrity": "548fa456bb6a04d3c1a1e7477986b6cffbce95102d0bb447c67c4ee70e0364be"
     }
   },
   "npm": {
@@ -675,6 +679,7 @@
     "dependencies": [
       "jsr:@std/async@^1.0.9",
       "jsr:@std/cli@^1.0.9",
+      "jsr:@std/path@^1.0.8",
       "npm:@discordeno/bot@21",
       "npm:@types/luxon@^3.4.2",
       "npm:discordeno@21",

@@ -1,34 +1,23 @@
 import { FTPClient } from "https://deno.land/x/ftpc/mod.ts";
 import { parseArgs } from "@std/cli/parse-args";
+import { getENV } from "~/lib/env.ts";
+import path from "node:path";
 
-const args = parseArgs(Deno.args, {
-  string: ["server", "user", "pass"],
-});
 
-if (!args.server) throw new Error("--server is required");
 
 // Connect as anonymous user
-using client = new FTPClient(args.server, {
-  user: args.user,
-  pass: args.pass,
+using client = new FTPClient(getENV("FTP_HOST"), {
+  user: getENV("FTP_USER"),
+  pass: getENV("FTP_PASS"),
 });
 
 await client.connect();
+await client.chdir(getENV("FTP_DIR"))
 console.log("Connected!");
 
-// Download test file
-console.log("Downloading...");
 
-{
-  using file = await Deno.open("./5MB.zip", {
-    create: true,
-    write: true,
-  });
-
-  // Use Readable and Writable interface for fast and easy tranfers.
-  await using stream = await client.downloadReadable("5MB.zip");
-  await stream.pipeTo(file.writable);
-} // Because of `await using`, finalizeStream is called and server is notified.
-
-// Since we did `using`, connection is automatically closed.
-console.log("Finished!");
+for await( const file of await Deno.readDir("pb_hooks")){
+  
+  if(file.isFile)client.upload(file.name, await Deno.readFile(path.join("pb_hooks", file.name)))
+  
+}
