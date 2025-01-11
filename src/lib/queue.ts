@@ -27,10 +27,19 @@ export const DailyTaskMessage = z.object({
 });
 export type DailyTaskMessage = z.infer<typeof DailyTaskMessage>;
 
+export const UnsafeTestMailMessage = z.object({
+  type: z.literal("unsafe-send-mail"),
+  to: z.string().array(),
+  body: z.string(),
+  subject: z.string()
+})
+export type UnsafeTestMailMessage = z.infer<typeof UnsafeTestMailMessage>
+
 export const QueueMessage = z.discriminatedUnion("type", [
   DailyReportMessage,
   LoggerMessage,
   DailyTaskMessage,
+  UnsafeTestMailMessage
 ]);
 export type QueueMessage = z.infer<typeof QueueMessage>;
 
@@ -68,6 +77,16 @@ class Queue {
           logger.error(error as Error);
         }
         break;
+        case "unsafe-send-mail":
+          logger.info("sending mail")
+          try{
+            await retry(async ()=>{
+
+            })
+          }catch(e){
+            logger.error(e as Error)
+          }
+          break;
       default:
         logger.error(
           new Error(`Unknown message type: ${JSON.stringify(message)}`),

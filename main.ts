@@ -56,7 +56,17 @@ app.basePath("/api")
       created_at: new Date(),
     });
     return c.text("NOT BAD");
-  });
+  })
+  .get("/testmail", c=>{
+    queue.enqueue({
+      type: "unsafe-send-mail",
+      to: ["next.mohammed.amr@gmail.com"],
+      body: "<h1>This is an email</h1><br>This is how we can start a new era<br><i>:)</i>",
+      subject: "Hello world"
+    })
+    return c.text("SUCCESS")
+  })
+  ;
 
 Deno.serve({ port: 8000 }, app.fetch);
 
